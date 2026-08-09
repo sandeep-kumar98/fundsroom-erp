@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type SubmitEvent } from "react";
+
 import {
   ArrowDownToLine,
   ArrowUpFromLine,
@@ -10,7 +11,6 @@ import {
   X,
   Warehouse,
   ArrowDown,
-  ArrowUp,
 } from "lucide-react";
 
 import api from "../services/api";
@@ -213,7 +213,7 @@ export default function StockMovements() {
   // =====================================================
 
   const handleSubmit = async (
-    event: FormEvent<HTMLFormElement>
+    event: SubmitEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
 
@@ -423,9 +423,7 @@ export default function StockMovements() {
   return (
     <div className="space-y-7">
 
-      {/* =================================================
-          HEADER
-      ================================================= */}
+      {/* HEADER */}
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
 
@@ -474,9 +472,7 @@ export default function StockMovements() {
 
       </div>
 
-      {/* =================================================
-          ALERTS
-      ================================================= */}
+      {/* ALERTS */}
 
       {error && (
         <div className="flex items-center justify-between border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -514,9 +510,7 @@ export default function StockMovements() {
         </div>
       )}
 
-      {/* =================================================
-          PRODUCT SELECTOR
-      ================================================= */}
+      {/* PRODUCT SELECTOR */}
 
       <div className="border border-gray-200 bg-white p-5">
 
@@ -608,9 +602,7 @@ export default function StockMovements() {
 
       </div>
 
-      {/* =================================================
-          PRODUCT SUMMARY
-      ================================================= */}
+      {/* PRODUCT SUMMARY */}
 
       {product && (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -664,13 +656,9 @@ export default function StockMovements() {
         </div>
       )}
 
-      {/* =================================================
-          MOVEMENT HISTORY
-      ================================================= */}
+      {/* MOVEMENT HISTORY */}
 
       <section className="overflow-hidden border border-gray-200 bg-white">
-
-        {/* HEADER */}
 
         <div className="border-b border-gray-100 px-5 py-5">
 
@@ -700,8 +688,6 @@ export default function StockMovements() {
             )}
 
           </div>
-
-          {/* FILTER BAR */}
 
           {product && (
             <div className="mt-5 flex flex-col gap-3 sm:flex-row">
@@ -777,11 +763,9 @@ export default function StockMovements() {
 
         </div>
 
-        {/* TABLE */}
-
         <div className="overflow-x-auto">
 
-          <table className="w-full min-w-[850px]">
+          <table className="w-full min-w-212.5">
 
             <thead>
 
@@ -847,9 +831,11 @@ export default function StockMovements() {
                   >
 
                     <div className="mx-auto flex h-10 w-10 items-center justify-center border border-gray-200 bg-gray-50 text-gray-400">
+
                       <Package
                         size={19}
                       />
+
                     </div>
 
                     <p className="mt-3 text-sm font-medium text-gray-600">
@@ -875,9 +861,11 @@ export default function StockMovements() {
                   >
 
                     <div className="mx-auto flex h-10 w-10 items-center justify-center border border-gray-200 bg-gray-50 text-gray-400">
+
                       <Package
                         size={19}
                       />
+
                     </div>
 
                     <p className="mt-3 text-sm font-medium text-gray-600">
@@ -908,8 +896,6 @@ export default function StockMovements() {
                         }
                         className="transition hover:bg-gray-50/60"
                       >
-
-                        {/* MOVEMENT */}
 
                         <td className="px-5 py-4">
 
@@ -962,8 +948,6 @@ export default function StockMovements() {
 
                         </td>
 
-                        {/* QUANTITY */}
-
                         <td className="px-5 py-4 text-right">
 
                           <span
@@ -983,8 +967,6 @@ export default function StockMovements() {
 
                         </td>
 
-                        {/* REASON */}
-
                         <td className="px-5 py-4">
 
                           <div className="max-w-sm text-sm text-gray-700">
@@ -994,8 +976,6 @@ export default function StockMovements() {
                           </div>
 
                         </td>
-
-                        {/* USER */}
 
                         <td className="px-5 py-4">
 
@@ -1013,8 +993,6 @@ export default function StockMovements() {
                           </div>
 
                         </td>
-
-                        {/* DATE */}
 
                         <td className="px-5 py-4 text-right">
 
@@ -1041,16 +1019,12 @@ export default function StockMovements() {
 
       </section>
 
-      {/* =================================================
-          STOCK ADJUSTMENT MODAL
-      ================================================= */}
+      {/* STOCK ADJUSTMENT MODAL */}
 
       {showMovementForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/40 p-4">
 
           <div className="w-full max-w-lg bg-white shadow-2xl">
-
-            {/* HEADER */}
 
             <div className="flex items-center justify-between border-b border-gray-100 px-6 py-5">
 
@@ -1085,8 +1059,6 @@ export default function StockMovements() {
               className="space-y-6 p-6"
             >
 
-              {/* PRODUCT */}
-
               <div className="border border-gray-200 bg-gray-50 p-4">
 
                 <div className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">
@@ -1105,8 +1077,6 @@ export default function StockMovements() {
                 </div>
 
               </div>
-
-              {/* TYPE */}
 
               <div>
 
@@ -1166,8 +1136,6 @@ export default function StockMovements() {
 
               </div>
 
-              {/* QUANTITY */}
-
               <div>
 
                 <label className="mb-2 block text-xs font-semibold text-gray-700">
@@ -1192,8 +1160,7 @@ export default function StockMovements() {
                   "OUT" &&
                   product && (
                     <p className="mt-2 text-[11px] text-gray-400">
-                      Maximum available:
-                      {" "}
+                      Maximum available:{" "}
                       {
                         product.current_stock
                       }{" "}
@@ -1202,8 +1169,6 @@ export default function StockMovements() {
                   )}
 
               </div>
-
-              {/* REASON */}
 
               <div>
 
@@ -1228,8 +1193,6 @@ export default function StockMovements() {
                 />
 
               </div>
-
-              {/* ACTIONS */}
 
               <div className="flex justify-end gap-3 border-t border-gray-100 pt-5">
 

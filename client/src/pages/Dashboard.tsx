@@ -10,7 +10,6 @@ import {
   CheckCircle2,
   Clock3,
   XCircle,
-  Plus,
 } from "lucide-react";
 
 import api from "../services/api";
