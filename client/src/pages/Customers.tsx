@@ -25,9 +25,9 @@ interface Customer {
   email?: string;
   business_name?: string;
   gst_number?: string;
-  customer_type: "Retail" | "Wholesale" | "Distributor";
+  customer_type: "RETAIL" | "WHOLESALE" | "DISTRIBUTOR";
   address?: string;
-  status: "Lead" | "Active" | "Inactive";
+  status: "LEAD" | "ACTIVE" | "INACTIVE";
   follow_up_date?: string;
   notes?: string;
   created_at: string;
@@ -49,9 +49,9 @@ interface CustomerForm {
   email: string;
   business_name: string;
   gst_number: string;
-  customer_type: "Retail" | "Wholesale" | "Distributor";
+  customer_type: "RETAIL" | "WHOLESALE" | "DISTRIBUTOR";
   address: string;
-  status: "Lead" | "Active" | "Inactive";
+  status: "LEAD" | "ACTIVE" | "INACTIVE";
   follow_up_date: string;
   notes: string;
 }
@@ -62,17 +62,32 @@ const emptyForm: CustomerForm = {
   email: "",
   business_name: "",
   gst_number: "",
-  customer_type: "Retail",
+  customer_type: "RETAIL",
   address: "",
-  status: "Lead",
+  status: "LEAD",
   follow_up_date: "",
   notes: "",
 };
 
 const statusStyles: Record<Customer["status"], string> = {
-  Lead: "bg-amber-50 text-amber-700 border-amber-200",
-  Active: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  Inactive: "bg-gray-100 text-gray-500 border-gray-200",
+  LEAD: "bg-amber-50 text-amber-700 border-amber-200",
+  ACTIVE: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  INACTIVE: "bg-gray-100 text-gray-500 border-gray-200",
+};
+
+const customerTypeLabels: Record<
+  Customer["customer_type"],
+  string
+> = {
+  RETAIL: "Retail",
+  WHOLESALE: "Wholesale",
+  DISTRIBUTOR: "Distributor",
+};
+
+const statusLabels: Record<Customer["status"], string> = {
+  LEAD: "Lead",
+  ACTIVE: "Active",
+  INACTIVE: "Inactive",
 };
 
 export default function Customers() {
@@ -90,6 +105,7 @@ export default function Customers() {
   const [totalPages, setTotalPages] = useState(1);
 
   const [showModal, setShowModal] = useState(false);
+
   const [editingCustomer, setEditingCustomer] =
     useState<Customer | null>(null);
 
@@ -129,13 +145,16 @@ export default function Customers() {
       }
 
       const response = await api.get<CustomerResponse>(
-  "/customers",
-  {
-    params,
-  }
-);
+        "/customers",
+        {
+          params,
+        }
+      );
 
-console.log("CUSTOMERS API RESPONSE:", response.data);
+      console.log(
+        "CUSTOMERS API RESPONSE:",
+        response.data
+      );
 
       setCustomers(response.data.customers || []);
 
@@ -143,7 +162,7 @@ console.log("CUSTOMERS API RESPONSE:", response.data);
         response.data.pagination?.totalPages || 1
       );
     } catch (err: any) {
-      console.error(err);
+      console.error("LOAD CUSTOMERS ERROR:", err);
 
       setError(
         err.response?.data?.message ||
@@ -170,6 +189,7 @@ console.log("CUSTOMERS API RESPONSE:", response.data);
   const openCreate = () => {
     setEditingCustomer(null);
     setForm(emptyForm);
+    setError("");
     setShowModal(true);
   };
 
@@ -183,9 +203,9 @@ console.log("CUSTOMERS API RESPONSE:", response.data);
       business_name: customer.business_name || "",
       gst_number: customer.gst_number || "",
       customer_type:
-        customer.customer_type || "Retail",
+        customer.customer_type || "RETAIL",
       address: customer.address || "",
-      status: customer.status || "Lead",
+      status: customer.status || "LEAD",
       follow_up_date:
         customer.follow_up_date
           ? customer.follow_up_date.slice(0, 10)
@@ -193,6 +213,7 @@ console.log("CUSTOMERS API RESPONSE:", response.data);
       notes: customer.notes || "",
     });
 
+    setError("");
     setShowModal(true);
   };
 
@@ -219,6 +240,8 @@ console.log("CUSTOMERS API RESPONSE:", response.data);
   ) => {
     event.preventDefault();
 
+    setError("");
+
     if (!form.name.trim()) {
       setError("Customer name is required.");
       return;
@@ -229,25 +252,46 @@ console.log("CUSTOMERS API RESPONSE:", response.data);
       return;
     }
 
+    if (!form.customer_type) {
+      setError("Customer type is required.");
+      return;
+    }
+
     try {
       setSaving(true);
-      setError("");
 
       const payload = {
         name: form.name.trim(),
         mobile: form.mobile.trim(),
+
         email: form.email.trim() || null,
-        business_name:
+
+        businessName:
           form.business_name.trim() || null,
-        gst_number:
+
+        gstNumber:
           form.gst_number.trim() || null,
-        customer_type: form.customer_type,
-        address: form.address.trim() || null,
-        status: form.status,
-        follow_up_date:
+
+        customerType:
+          form.customer_type.toUpperCase(),
+
+        address:
+          form.address.trim() || null,
+
+        status:
+          form.status.toUpperCase(),
+
+        followUpDate:
           form.follow_up_date || null,
-        notes: form.notes.trim() || null,
+
+        notes:
+          form.notes.trim() || null,
       };
+
+      console.log(
+        "CUSTOMER PAYLOAD:",
+        payload
+      );
 
       if (editingCustomer) {
         await api.put(
@@ -255,13 +299,20 @@ console.log("CUSTOMERS API RESPONSE:", response.data);
           payload
         );
       } else {
-        await api.post("/customers", payload);
+        await api.post(
+          "/customers",
+          payload
+        );
       }
 
       closeModal();
+
       await loadCustomers();
     } catch (err: any) {
-      console.error(err);
+      console.error(
+        "SAVE CUSTOMER ERROR:",
+        err
+      );
 
       setError(
         err.response?.data?.message ||
@@ -277,18 +328,26 @@ console.log("CUSTOMERS API RESPONSE:", response.data);
 
     try {
       setSaving(true);
+      setError("");
 
-      await api.delete(`/customers/${deleteId}`);
+      await api.delete(
+        `/customers/${deleteId}`
+      );
 
       setDeleteId(null);
 
-      if (selectedCustomer?.id === deleteId) {
+      if (
+        selectedCustomer?.id === deleteId
+      ) {
         setSelectedCustomer(null);
       }
 
       await loadCustomers();
     } catch (err: any) {
-      console.error(err);
+      console.error(
+        "DELETE CUSTOMER ERROR:",
+        err
+      );
 
       setError(
         err.response?.data?.message ||
@@ -331,7 +390,6 @@ console.log("CUSTOMERS API RESPONSE:", response.data);
           className="inline-flex h-10 items-center justify-center gap-2 bg-gray-950 px-4 text-sm font-medium text-white transition hover:bg-gray-800"
         >
           <Plus size={16} />
-
           Add customer
         </button>
 
@@ -381,48 +439,50 @@ console.log("CUSTOMERS API RESPONSE:", response.data);
 
           <select
             value={statusFilter}
-            onChange={(event) =>
-              setStatusFilter(event.target.value)
-            }
+            onChange={(event) => {
+              setPage(1);
+              setStatusFilter(event.target.value);
+            }}
             className="h-10 border border-gray-200 bg-white px-3 text-sm text-gray-600 outline-none focus:border-gray-900"
           >
             <option value="ALL">
               All statuses
             </option>
 
-            <option value="Lead">
+            <option value="LEAD">
               Lead
             </option>
 
-            <option value="Active">
+            <option value="ACTIVE">
               Active
             </option>
 
-            <option value="Inactive">
+            <option value="INACTIVE">
               Inactive
             </option>
           </select>
 
           <select
             value={typeFilter}
-            onChange={(event) =>
-              setTypeFilter(event.target.value)
-            }
+            onChange={(event) => {
+              setPage(1);
+              setTypeFilter(event.target.value);
+            }}
             className="h-10 border border-gray-200 bg-white px-3 text-sm text-gray-600 outline-none focus:border-gray-900"
           >
             <option value="ALL">
               All types
             </option>
 
-            <option value="Retail">
+            <option value="RETAIL">
               Retail
             </option>
 
-            <option value="Wholesale">
+            <option value="WHOLESALE">
               Wholesale
             </option>
 
-            <option value="Distributor">
+            <option value="DISTRIBUTOR">
               Distributor
             </option>
           </select>
@@ -440,6 +500,7 @@ console.log("CUSTOMERS API RESPONSE:", response.data);
           <table className="w-full min-w-[900px] text-left">
 
             <thead>
+
               <tr className="border-b border-gray-100 bg-gray-50/70">
 
                 <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-gray-400">
@@ -467,6 +528,7 @@ console.log("CUSTOMERS API RESPONSE:", response.data);
                 </th>
 
               </tr>
+
             </thead>
 
             <tbody className="divide-y divide-gray-100">
@@ -485,6 +547,7 @@ console.log("CUSTOMERS API RESPONSE:", response.data);
                       />
 
                       Loading customers...
+
                     </div>
                   </td>
                 </tr>
@@ -510,108 +573,132 @@ console.log("CUSTOMERS API RESPONSE:", response.data);
                   </td>
                 </tr>
               ) : (
-                visibleCustomers.map((customer) => (
-                  <tr
-                    key={customer.id}
-                    className="group transition hover:bg-gray-50/60"
-                  >
+                visibleCustomers.map(
+                  (customer) => (
+                    <tr
+                      key={customer.id}
+                      className="group transition hover:bg-gray-50/60"
+                    >
 
-                    <td className="px-5 py-4">
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setSelectedCustomer(customer)
-                        }
-                        className="text-left"
-                      >
-
-                        <div className="font-medium text-gray-900 hover:text-gray-600">
-                          {customer.name}
-                        </div>
-
-                        <div className="mt-0.5 text-xs text-gray-400">
-                          #{String(customer.id).padStart(4, "0")}
-                        </div>
-
-                      </button>
-
-                    </td>
-
-                    <td className="px-5 py-4">
-
-                      <div className="text-sm text-gray-700">
-                        {customer.business_name || "—"}
-                      </div>
-
-                    </td>
-
-                    <td className="px-5 py-4">
-
-                      <span className="text-sm text-gray-600">
-                        {customer.customer_type}
-                      </span>
-
-                    </td>
-
-                    <td className="px-5 py-4">
-
-                      <div className="text-sm text-gray-700">
-                        {customer.mobile}
-                      </div>
-
-                      {customer.email && (
-                        <div className="mt-0.5 text-xs text-gray-400">
-                          {customer.email}
-                        </div>
-                      )}
-
-                    </td>
-
-                    <td className="px-5 py-4">
-
-                      <span
-                        className={`inline-flex border px-2 py-1 text-[11px] font-medium ${
-                          statusStyles[customer.status]
-                        }`}
-                      >
-                        {customer.status}
-                      </span>
-
-                    </td>
-
-                    <td className="px-5 py-4">
-
-                      <div className="flex justify-end gap-1 opacity-70 transition group-hover:opacity-100">
+                      <td className="px-5 py-4">
 
                         <button
                           type="button"
                           onClick={() =>
-                            openEdit(customer)
+                            setSelectedCustomer(
+                              customer
+                            )
                           }
-                          className="flex h-8 w-8 items-center justify-center text-gray-500 hover:bg-gray-100 hover:text-gray-900"
-                          title="Edit"
+                          className="text-left"
                         >
-                          <Pencil size={15} />
+
+                          <div className="font-medium text-gray-900 hover:text-gray-600">
+                            {customer.name}
+                          </div>
+
+                          <div className="mt-0.5 text-xs text-gray-400">
+                            #
+                            {String(
+                              customer.id
+                            ).padStart(4, "0")}
+                          </div>
+
                         </button>
 
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setDeleteId(customer.id)
+                      </td>
+
+                      <td className="px-5 py-4">
+
+                        <div className="text-sm text-gray-700">
+                          {customer.business_name ||
+                            "—"}
+                        </div>
+
+                      </td>
+
+                      <td className="px-5 py-4">
+
+                        <span className="text-sm text-gray-600">
+                          {
+                            customerTypeLabels[
+                              customer.customer_type
+                            ] ||
+                            customer.customer_type
                           }
-                          className="flex h-8 w-8 items-center justify-center text-gray-400 hover:bg-red-50 hover:text-red-600"
-                          title="Delete"
+                        </span>
+
+                      </td>
+
+                      <td className="px-5 py-4">
+
+                        <div className="text-sm text-gray-700">
+                          {customer.mobile}
+                        </div>
+
+                        {customer.email && (
+                          <div className="mt-0.5 text-xs text-gray-400">
+                            {customer.email}
+                          </div>
+                        )}
+
+                      </td>
+
+                      <td className="px-5 py-4">
+
+                        <span
+                          className={`inline-flex border px-2 py-1 text-[11px] font-medium ${
+                            statusStyles[
+                              customer.status
+                            ]
+                          }`}
                         >
-                          <Trash2 size={15} />
-                        </button>
+                          {
+                            statusLabels[
+                              customer.status
+                            ] ||
+                            customer.status
+                          }
+                        </span>
 
-                      </div>
+                      </td>
 
-                    </td>
+                      <td className="px-5 py-4">
 
-                  </tr>
-                ))
+                        <div className="flex justify-end gap-1 opacity-70 transition group-hover:opacity-100">
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              openEdit(
+                                customer
+                              )
+                            }
+                            className="flex h-8 w-8 items-center justify-center text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+                            title="Edit"
+                          >
+                            <Pencil size={15} />
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setDeleteId(
+                                customer.id
+                              )
+                            }
+                            className="flex h-8 w-8 items-center justify-center text-gray-400 hover:bg-red-50 hover:text-red-600"
+                            title="Delete"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+
+                        </div>
+
+                      </td>
+
+                    </tr>
+                  )
+                )
               )}
 
             </tbody>
@@ -622,45 +709,54 @@ console.log("CUSTOMERS API RESPONSE:", response.data);
 
         {/* Pagination */}
 
-        {!loading && visibleCustomers.length > 0 && (
-          <div className="flex items-center justify-between border-t border-gray-100 px-5 py-3">
+        {!loading &&
+          visibleCustomers.length > 0 && (
+            <div className="flex items-center justify-between border-t border-gray-100 px-5 py-3">
 
-            <p className="text-xs text-gray-400">
-              Page {page} of {totalPages}
-            </p>
+              <p className="text-xs text-gray-400">
+                Page {page} of {totalPages}
+              </p>
 
-            <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1">
 
-              <button
-                type="button"
-                disabled={page <= 1}
-                onClick={() =>
-                  setPage((current) =>
-                    Math.max(1, current - 1)
-                  )
-                }
-                className="flex h-8 w-8 items-center justify-center border border-gray-200 text-gray-500 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-30"
-              >
-                <ChevronLeft size={15} />
-              </button>
+                <button
+                  type="button"
+                  disabled={page <= 1}
+                  onClick={() =>
+                    setPage((current) =>
+                      Math.max(
+                        1,
+                        current - 1
+                      )
+                    )
+                  }
+                  className="flex h-8 w-8 items-center justify-center border border-gray-200 text-gray-500 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-30"
+                >
+                  <ChevronLeft size={15} />
+                </button>
 
-              <button
-                type="button"
-                disabled={page >= totalPages}
-                onClick={() =>
-                  setPage((current) =>
-                    Math.min(totalPages, current + 1)
-                  )
-                }
-                className="flex h-8 w-8 items-center justify-center border border-gray-200 text-gray-500 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-30"
-              >
-                <ChevronRight size={15} />
-              </button>
+                <button
+                  type="button"
+                  disabled={
+                    page >= totalPages
+                  }
+                  onClick={() =>
+                    setPage((current) =>
+                      Math.min(
+                        totalPages,
+                        current + 1
+                      )
+                    )
+                  }
+                  className="flex h-8 w-8 items-center justify-center border border-gray-200 text-gray-500 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-30"
+                >
+                  <ChevronRight size={15} />
+                </button>
+
+              </div>
 
             </div>
-
-          </div>
-        )}
+          )}
 
       </div>
 
@@ -674,6 +770,7 @@ console.log("CUSTOMERS API RESPONSE:", response.data);
             <div className="flex items-center justify-between border-b border-gray-100 px-6 py-5">
 
               <div>
+
                 <h2 className="text-lg font-semibold text-gray-950">
                   {editingCustomer
                     ? "Edit customer"
@@ -683,6 +780,7 @@ console.log("CUSTOMERS API RESPONSE:", response.data);
                 <p className="mt-1 text-xs text-gray-400">
                   Customer information and CRM details
                 </p>
+
               </div>
 
               <button
@@ -779,7 +877,10 @@ console.log("CUSTOMERS API RESPONSE:", response.data);
                   />
                 </FormField>
 
-                <FormField label="Customer type">
+                <FormField
+                  label="Customer type"
+                  required
+                >
                   <select
                     value={form.customer_type}
                     onChange={(event) =>
@@ -790,15 +891,15 @@ console.log("CUSTOMERS API RESPONSE:", response.data);
                     }
                     className={inputClass}
                   >
-                    <option value="Retail">
+                    <option value="RETAIL">
                       Retail
                     </option>
 
-                    <option value="Wholesale">
+                    <option value="WHOLESALE">
                       Wholesale
                     </option>
 
-                    <option value="Distributor">
+                    <option value="DISTRIBUTOR">
                       Distributor
                     </option>
                   </select>
@@ -815,15 +916,15 @@ console.log("CUSTOMERS API RESPONSE:", response.data);
                     }
                     className={inputClass}
                   >
-                    <option value="Lead">
+                    <option value="LEAD">
                       Lead
                     </option>
 
-                    <option value="Active">
+                    <option value="ACTIVE">
                       Active
                     </option>
 
-                    <option value="Inactive">
+                    <option value="INACTIVE">
                       Inactive
                     </option>
                   </select>
@@ -890,6 +991,7 @@ console.log("CUSTOMERS API RESPONSE:", response.data);
                   disabled={saving}
                   className="flex h-10 min-w-28 items-center justify-center gap-2 bg-gray-950 px-4 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-60"
                 >
+
                   {saving && (
                     <Loader2
                       size={15}
@@ -900,6 +1002,7 @@ console.log("CUSTOMERS API RESPONSE:", response.data);
                   {editingCustomer
                     ? "Save changes"
                     : "Create customer"}
+
                 </button>
 
               </div>
@@ -928,6 +1031,7 @@ console.log("CUSTOMERS API RESPONSE:", response.data);
             <div className="flex items-center justify-between border-b border-gray-100 px-6 py-5">
 
               <div>
+
                 <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400">
                   Customer profile
                 </p>
@@ -935,6 +1039,7 @@ console.log("CUSTOMERS API RESPONSE:", response.data);
                 <h2 className="mt-1 text-lg font-semibold text-gray-950">
                   {selectedCustomer.name}
                 </h2>
+
               </div>
 
               <button
@@ -960,14 +1065,20 @@ console.log("CUSTOMERS API RESPONSE:", response.data);
                     ]
                   }`}
                 >
-                  {selectedCustomer.status}
+                  {
+                    statusLabels[
+                      selectedCustomer.status
+                    ]
+                  }
                 </span>
 
                 <button
                   type="button"
                   onClick={() => {
                     setSelectedCustomer(null);
-                    openEdit(selectedCustomer);
+                    openEdit(
+                      selectedCustomer
+                    );
                   }}
                   className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-950"
                 >
@@ -991,14 +1102,17 @@ console.log("CUSTOMERS API RESPONSE:", response.data);
                 <DetailRow
                   icon={<Phone size={16} />}
                   label="Mobile"
-                  value={selectedCustomer.mobile}
+                  value={
+                    selectedCustomer.mobile
+                  }
                 />
 
                 <DetailRow
                   icon={<Mail size={16} />}
                   label="Email"
                   value={
-                    selectedCustomer.email || "—"
+                    selectedCustomer.email ||
+                    "—"
                   }
                 />
 
@@ -1015,7 +1129,8 @@ console.log("CUSTOMERS API RESPONSE:", response.data);
                   icon={<MapPin size={16} />}
                   label="Address"
                   value={
-                    selectedCustomer.address || "—"
+                    selectedCustomer.address ||
+                    "—"
                   }
                 />
 
@@ -1060,7 +1175,12 @@ console.log("CUSTOMERS API RESPONSE:", response.data);
                 </div>
 
                 <div className="mt-1 text-sm font-medium text-gray-900">
-                  {selectedCustomer.customer_type}
+                  {
+                    customerTypeLabels[
+                      selectedCustomer.customer_type
+                    ] ||
+                    selectedCustomer.customer_type
+                  }
                 </div>
 
               </div>
@@ -1092,7 +1212,9 @@ console.log("CUSTOMERS API RESPONSE:", response.data);
 
               <button
                 type="button"
-                onClick={() => setDeleteId(null)}
+                onClick={() =>
+                  setDeleteId(null)
+                }
                 className="h-10 border border-gray-200 px-4 text-sm font-medium text-gray-600 hover:bg-gray-50"
               >
                 Cancel
@@ -1133,6 +1255,7 @@ function FormField({
   return (
     <div>
       <label className="mb-2 block text-xs font-medium text-gray-700">
+
         {label}
 
         {required && (
@@ -1140,6 +1263,7 @@ function FormField({
             *
           </span>
         )}
+
       </label>
 
       {children}
