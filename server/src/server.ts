@@ -20,7 +20,7 @@ const app = express();
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "http://localhost:5174",
+  "https://fundsroom-erp-ecru.vercel.app",
 ];
 
 app.use(
