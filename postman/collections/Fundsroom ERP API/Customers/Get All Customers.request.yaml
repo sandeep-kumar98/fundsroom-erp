@@ -1,0 +1,23 @@
+$kind: http-request
+name: Get All Customers
+method: GET
+url: '{{baseUrl}}/api/customers'
+order: 2000
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{authToken}}'
+queryParams:
+  - key: search
+    value: ''
+    disabled: true
+  - key: status
+    value: ACTIVE
+    disabled: true
+  - key: page
+    value: '1'
+    disabled: true
+  - key: limit
+    value: '10'
+    disabled: true

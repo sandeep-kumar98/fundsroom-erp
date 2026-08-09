@@ -1,0 +1,23 @@
+$kind: http-request
+name: Get All Challans
+method: GET
+url: '{{baseUrl}}/api/challans'
+order: 2000
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{authToken}}'
+queryParams:
+  - key: status
+    value: DRAFT
+    disabled: true
+  - key: search
+    value: ''
+    disabled: true
+  - key: page
+    value: '1'
+    disabled: true
+  - key: limit
+    value: '10'
+    disabled: true

@@ -1,0 +1,21 @@
+$kind: http-request
+name: Update Stock
+method: POST
+url: '{{baseUrl}}/api/products/{{productId}}/stock'
+order: 1000
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{authToken}}'
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "quantity": 20,
+      "movementType": "IN",
+      "reason": "Restocking from supplier"
+    }

@@ -1,0 +1,24 @@
+$kind: http-request
+name: Update Product
+method: PUT
+url: '{{baseUrl}}/api/products/{{productId}}'
+order: 4000
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{authToken}}'
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Updated Product Name",
+      "sku": "SKU-001",
+      "category": "Electronics",
+      "unitPrice": 1099.99,
+      "minimumStock": 15,
+      "location": "Warehouse B"
+    }

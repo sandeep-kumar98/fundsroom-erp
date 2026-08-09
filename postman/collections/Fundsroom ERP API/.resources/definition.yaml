@@ -1,0 +1,13 @@
+$kind: collection
+name: Fundsroom ERP API
+variables:
+  - key: baseUrl
+    value: 'http://localhost:5000'
+  - key: authToken
+    value: ''
+  - key: productId
+    value: '1'
+  - key: customerId
+    value: '1'
+  - key: challanId
+    value: '1'

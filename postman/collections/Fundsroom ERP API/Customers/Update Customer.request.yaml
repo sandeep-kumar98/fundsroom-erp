@@ -1,0 +1,28 @@
+$kind: http-request
+name: Update Customer
+method: PUT
+url: '{{baseUrl}}/api/customers/{{customerId}}'
+order: 4000
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{authToken}}'
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Rajesh Kumar",
+      "mobile": "9876543210",
+      "email": "rajesh@example.com",
+      "businessName": "Kumar Enterprises",
+      "gstNumber": "22AAAAA0000A1Z5",
+      "customerType": "WHOLESALE",
+      "address": "456 New Street, Mumbai",
+      "status": "ACTIVE",
+      "followUpDate": "2025-03-01",
+      "notes": "Updated notes"
+    }

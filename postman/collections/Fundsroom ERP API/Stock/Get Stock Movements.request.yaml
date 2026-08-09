@@ -1,0 +1,10 @@
+$kind: http-request
+name: Get Stock Movements
+method: GET
+url: '{{baseUrl}}/api/products/{{productId}}/stock-movements'
+order: 2000
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{authToken}}'

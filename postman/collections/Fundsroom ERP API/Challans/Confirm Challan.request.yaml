@@ -1,0 +1,10 @@
+$kind: http-request
+name: Confirm Challan
+method: POST
+url: '{{baseUrl}}/api/challans/{{challanId}}/confirm'
+order: 4000
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{authToken}}'
